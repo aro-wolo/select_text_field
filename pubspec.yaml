@@ -1,6 +1,6 @@
 name: select_text_field
+version: 0.0.2
 description: Allow your regular textfield to show a dropdown list of options.
-version: 0.0.1
 
 
 environment:
