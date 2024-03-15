@@ -14,6 +14,7 @@ class _ExampleState extends State<Example> {
 
   // form key for validation
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController txtController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +31,7 @@ class _ExampleState extends State<Example> {
             SelectTextField(
               options: _genderList,
               label: 'Gender',
+              controller: txtController,
             )
           ],
         ),
