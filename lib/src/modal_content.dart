@@ -68,7 +68,7 @@ class _ModalContentState extends State<ModalContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _filteredOptions.length > 15
+          widget.options.length > 15
               ? Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: TextField(
@@ -99,12 +99,14 @@ class _ModalContentState extends State<ModalContent> {
                   value: _filteredOptions[index],
                   groupValue: _selectedItem,
                   onChanged: (value) {
-                    widget.controller.text = value!;
-                    widget.onChanged?.call(value);
                     setState(() {
                       _selectedItem = value;
                     });
-                    Navigator.pop(context);
+                    widget.controller.text = value!;
+                    widget.onChanged?.call(value);
+                    Future.delayed(Duration(milliseconds: 250), () {
+                      Navigator.pop(context);
+                    });
                   },
                 );
               },
