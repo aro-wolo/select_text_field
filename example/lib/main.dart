@@ -41,20 +41,29 @@ class _ExamplePageState extends State<ExamplePage> {
             SelectTextField(
                 options: ['Option 1', 'Option 2', 'Option 3'],
                 label: 'Select an option',
-                controller: _controller),
+                controller: _controller,
+                onChanged: (value) {
+                  setState(() {
+                    _controller.text = value;
+                  });
+                }),
             SizedBox(height: 20),
             Text(
-              'Selected Option: ${_controller.text}',
+              'Selected Option: ${_controller.text}*',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
             SelectTextField(
-              options: countryList,
-              label: 'Search Example',
-              controller: _sController,
-            ),
+                options: countryList,
+                label: 'Search Example',
+                controller: _sController,
+                onChanged: (value) {
+                  setState(() {
+                    _sController.text = value;
+                  });
+                }),
             Text(
-              'Selected Country: ${_sController.text}',
+              'Selected Country: ${_sController.text}*',
               style: TextStyle(fontSize: 18),
             ),
           ],
