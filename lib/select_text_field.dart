@@ -1,3 +1,5 @@
 library select_text_field;
 
-export 'src/main.dart';
+export 'src/widget.dart';
+export 'src/modal_content.dart';
+export 'package:tinycolor2/tinycolor2.dart';

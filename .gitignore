@@ -26,3 +26,8 @@ doc/api/
 .flutter-plugins
 .flutter-plugins-dependencies
 .DS_Store
+.idea
+web
+.metadata
+analysis_options.yaml
+select_text_field.iml
