@@ -57,6 +57,20 @@ class _ModalContentState extends State<ModalContent> {
 
     final double modalHeight = (deviceHeight * heightFactor) + keyboardHeight;
     final bool isFullHeight = modalHeight >= deviceHeight;
+    var _bColor = TinyColor.fromColor(
+            Theme.of(context).bottomSheetTheme.backgroundColor ?? Colors.white)
+        .darken(8)
+        .color;
+    var _bColor2 = TinyColor.fromColor(
+            Theme.of(context).bottomSheetTheme.backgroundColor ?? Colors.white)
+        .darken(3)
+        .color;
+
+    if (_serachButtonClicked) {
+      setState(() {
+        FocusScope.of(context).requestFocus(_focusNode);
+      });
+    }
     return Container(
       padding: EdgeInsets.only(
         top: isFullHeight ? topObstructions : 0,
