@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:tinycolor2/tinycolor2.dart';
 
 class ModalContent extends StatefulWidget {
   final List<String> options;
   final TextEditingController controller;
+  final String title;
   final Function(String)? onChanged;
 
   const ModalContent({
     super.key,
     required this.options,
     required this.controller,
+    required this.title,
     this.onChanged,
   });
 
@@ -17,10 +20,18 @@ class ModalContent extends StatefulWidget {
 }
 
 class _ModalContentState extends State<ModalContent> {
+  final FocusNode _focusNode = FocusNode();
   String? _selectedItem;
   String _searchValue = "";
+  bool _serachButtonClicked = false;
 
   List<String> _filteredOptions = [];
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -82,26 +93,86 @@ class _ModalContentState extends State<ModalContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          widget.options.length > 15
-              ? Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search...',
-                      prefixIcon: Icon(Icons.search),
+          Container(
+            padding: EdgeInsets.fromLTRB(15, 20, 15, 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(25),
+                topRight: Radius.circular(25),
+              ),
+              color: _bColor,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: _serachButtonClicked
+                      ? Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: Icon(Icons.search, color: Colors.grey),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                focusNode: _focusNode,
+                                decoration: InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  hintText: 'Search for ${widget.title}..',
+                                  focusedBorder: UnderlineInputBorder(
+                                      borderSide: BorderSide(width: 0, color: _bColor)),
+                                  enabledBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(width: 0, color: _bColor),
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _searchValue = value;
+                                    _filteredOptions = widget.options
+                                        .where((item) => item
+                                            .toLowerCase()
+                                            .contains(value.toLowerCase()))
+                                        .toList();
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          widget.title,
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                ),
+                Row(
+                  children: [
+                    Visibility(
+                      visible: widget.options.length > 15 && !_serachButtonClicked,
+                      child: modalIconButton(
+                        bgColor: _bColor2,
+                        onTap: () {
+                          setState(() {
+                            _serachButtonClicked = true;
+                          });
+                        },
+                        iconName: Icons.search,
+                      ),
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchValue = value;
-                        _filteredOptions = widget.options
-                            .where((item) =>
-                                item.toLowerCase().contains(value.toLowerCase()))
-                            .toList();
-                      });
-                    },
-                  ),
-                )
-              : const SizedBox.shrink(),
+                    const SizedBox(width: 8),
+                    modalIconButton(
+                      bgColor: _bColor2,
+                      onTap: () => Navigator.of(context).pop(),
+                      iconName: Icons.close,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: _filteredOptions.length,
@@ -155,5 +226,37 @@ class _ModalContentState extends State<ModalContent> {
     spans.add(TextSpan(text: text.substring(start)));
 
     return TextSpan(children: spans);
+  }
+}
+
+class modalIconButton extends StatelessWidget {
+  final Function() onTap;
+  final IconData iconName;
+  final Color bgColor;
+
+  const modalIconButton({
+    super.key,
+    required this.onTap,
+    required this.iconName,
+    required this.bgColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(5),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          color: bgColor,
+        ),
+        child: Icon(
+          iconName,
+          size: 20.0,
+          color: Colors.black87,
+        ),
+      ),
+    );
   }
 }

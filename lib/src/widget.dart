@@ -70,6 +70,7 @@ class _SelectTextFieldXState extends State<SelectTextField> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return ModalContent(
+          title: widget.label,
           options: widget.options,
           controller: widget.controller,
           onChanged: widget.onChanged,
