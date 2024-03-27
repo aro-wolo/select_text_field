@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:select_text_field/select_text_field.dart';
 import 'package:tinycolor2/tinycolor2.dart';
 
 class ModalContent extends StatefulWidget {
@@ -76,6 +77,10 @@ class _ModalContentState extends State<ModalContent> {
             Theme.of(context).bottomSheetTheme.backgroundColor ?? Colors.white)
         .darken(3)
         .color;
+    var _iColor = TinyColor.fromColor(
+            Theme.of(context).bottomSheetTheme.backgroundColor ?? Colors.white)
+        .darken(50)
+        .color;
 
     if (_serachButtonClicked) {
       setState(() {
@@ -94,7 +99,7 @@ class _ModalContentState extends State<ModalContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(15, 20, 15, 20),
+            padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(25),
@@ -154,6 +159,7 @@ class _ModalContentState extends State<ModalContent> {
                       visible: widget.options.length > 15 && !_serachButtonClicked,
                       child: modalIconButton(
                         bgColor: _bColor2,
+                        iconColor: _iColor,
                         onTap: () {
                           setState(() {
                             _serachButtonClicked = true;
@@ -165,6 +171,7 @@ class _ModalContentState extends State<ModalContent> {
                     const SizedBox(width: 8),
                     modalIconButton(
                       bgColor: _bColor2,
+                      iconColor: _iColor,
                       onTap: () => Navigator.of(context).pop(),
                       iconName: Icons.close,
                     ),
@@ -226,37 +233,5 @@ class _ModalContentState extends State<ModalContent> {
     spans.add(TextSpan(text: text.substring(start)));
 
     return TextSpan(children: spans);
-  }
-}
-
-class modalIconButton extends StatelessWidget {
-  final Function() onTap;
-  final IconData iconName;
-  final Color bgColor;
-
-  const modalIconButton({
-    super.key,
-    required this.onTap,
-    required this.iconName,
-    required this.bgColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-          color: bgColor,
-        ),
-        child: Icon(
-          iconName,
-          size: 20.0,
-          color: Colors.black87,
-        ),
-      ),
-    );
   }
 }
