@@ -2,6 +2,10 @@
 
 SelectTextField is a Flutter package that provides a customizable text field widget with a dropdown icon. It allows users to select options from a modal bottom sheet, providing a convenient and intuitive user interface for selecting values.
 
+## UI
+![Screen shoot](https://github.com/aro-wolo/select_text_field/assets/109182707/6d9efef8-5490-4ba9-b885-2e3275a2c66c)
+
+
 ## Features
 
 - Integration of text field and dropdown functionality into a single widget.
