@@ -2,39 +2,83 @@ import 'package:flutter/material.dart';
 import 'package:select_text_field/select_text_field.dart';
 
 class SelectTextField extends StatefulWidget {
-  /// List of the options that the buttom sheet will hold
-  final List<String> options;
-
-  /// display label of the text
+  final List<dynamic> options;
+  final TextEditingController? controller;
   final String label;
-
-  /// text endit controller
-  final TextEditingController controller;
-
-  /// what should happen when there is a change in the value of the text
-  final Function(String)? onChanged;
-
-  /// check for empty value
+  final dynamic selectedValue;
+  final Function(dynamic)? onChanged;
   final bool? required;
-
-  /// add your custom validation
   final FormFieldValidator<String>? validator;
+  final String? displayValue;
 
   const SelectTextField({
     super.key,
     required this.options,
     required this.label,
-    required this.controller,
     this.validator,
     this.onChanged,
     this.required,
+    this.selectedValue,
+    this.controller,
+    this.displayValue,
   });
 
   @override
-  State<SelectTextField> createState() => _SelectTextFieldXState();
+  State<SelectTextField> createState() => SelectTextFieldState();
 }
 
-class _SelectTextFieldXState extends State<SelectTextField> {
+class SelectTextFieldState extends State<SelectTextField> {
+  late TextEditingController _internalController;
+  late bool _isSimpleList;
+  dynamic _selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+    newMethod();
+    //widget.controller?.addListener(newMethod);
+  }
+
+  void newMethod() {
+    _isSimpleList = widget.options.isEmpty || widget.options[0] is! Map<String, dynamic>;
+
+    String initialDisplayTitle = '';
+    if (widget.displayValue != null) {
+      initialDisplayTitle = widget.displayValue!;
+    } else if (widget.selectedValue != null) {
+      initialDisplayTitle = _getDisplayValue(widget.selectedValue);
+    } else if (widget.controller != null && widget.controller!.text.isNotEmpty) {
+      initialDisplayTitle = _getDisplayValue(widget.controller!.text);
+    }
+
+    _internalController = TextEditingController(text: initialDisplayTitle);
+
+    if (widget.controller != null && widget.controller!.text.isEmpty) {
+      widget.controller!.text = initialDisplayTitle;
+    }
+
+    _selectedValue = widget.selectedValue ?? widget.controller?.text;
+  }
+
+  String _getDisplayValue(dynamic value) {
+    if (_isSimpleList) {
+      return value;
+    } else {
+      for (var option in widget.options) {
+        if ("${option['key']}" == value.toString()) {
+          return option['title'];
+        }
+      }
+      return '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _internalController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -43,7 +87,7 @@ class _SelectTextFieldXState extends State<SelectTextField> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: TextFormField(
-            controller: widget.controller,
+            controller: _internalController,
             readOnly: true,
             onTap: () {
               _showModalBottomSheet(context);
@@ -52,7 +96,10 @@ class _SelectTextFieldXState extends State<SelectTextField> {
             decoration: InputDecoration(
               labelText: widget.label,
               suffixIcon: IconButton(
-                icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  //color: Colors.grey,
+                ),
                 onPressed: () {
                   _showModalBottomSheet(context);
                 },
@@ -64,6 +111,17 @@ class _SelectTextFieldXState extends State<SelectTextField> {
     );
   }
 
+  void _handleMessage(dynamic message) {
+    setState(() {
+      _selectedValue = message;
+      widget.onChanged!(message);
+    });
+  }
+
+  dynamic getSelectedValue() {
+    return _selectedValue;
+  }
+
   void _showModalBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -72,8 +130,38 @@ class _SelectTextFieldXState extends State<SelectTextField> {
         return ModalContent(
           title: widget.label,
           options: widget.options,
-          controller: widget.controller,
-          onChanged: widget.onChanged,
+          //selectedValue: widget.selectedValue ?? widget.controller?.text,
+          selectedValue: _selectedValue,
+          onMessage: _handleMessage,
+          onChanged: (value) {
+            if (widget.onChanged != null) {
+              widget.onChanged!(value);
+            }
+            setState(() {
+              _selectedValue = _isSimpleList ? value : value['key'];
+              final displayValue = _getDisplayValue(_isSimpleList ? value : value['key']);
+              if (widget.controller != null) {
+                widget.controller!.text = displayValue;
+              }
+              _internalController.text = displayValue;
+              /* print("internal=$_selectedValue");
+              print("internal-onch-value=$value"); */
+            });
+          },
+          /*       onChanged: (value) {
+            setState(() {
+              _selectedValue = _isSimpleList ? value : value['key'];
+              final displayValue = _getDisplayValue(_isSimpleList ? value : value['key']);
+              if (widget.controller != null) {
+                widget.controller!.text = displayValue;
+              }
+              _internalController.text = displayValue;
+            });
+            // Update selectedValue in the parent
+            if (widget.onChanged != null) {
+              widget.onChanged!(_selectedValue);
+            }
+          }, */
         );
       },
     );

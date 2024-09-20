@@ -24,11 +24,34 @@ class ExamplePage extends StatefulWidget {
 }
 
 class _ExamplePageState extends State<ExamplePage> {
-  TextEditingController _controller = TextEditingController(),
-      _sController = TextEditingController();
-
+  TextEditingController _controller = TextEditingController();
+  TextEditingController _sController = TextEditingController();
+  TextEditingController _sController2 = TextEditingController();
+  final List<Map<String, dynamic>> keyValuePairs = [
+    {'title': 'Alice', 'value': 101},
+    {'title': 'Bob', 'value': 202},
+    {'title': 'Charlie', 'value': 303},
+    {'title': 'David', 'value': 404},
+    {'title': 'Eve', 'value': 505},
+    {'title': 'Frank', 'value': 606},
+    {'title': 'Grace', 'value': 707},
+    {'title': 'Henry', 'value': 808},
+    {'title': 'Ivy', 'value': 909},
+    {'title': 'Jack', 'value': 111},
+    {'title': 'Katie', 'value': 222},
+    {'title': 'Liam', 'value': 333},
+    {'title': 'Mia', 'value': 444},
+    {'title': 'Nathan', 'value': 555},
+    {'title': 'Olivia', 'value': 666},
+    {'title': 'Peter', 'value': 777},
+    {'title': 'Quinn', 'value': 888},
+    {'title': 'Rachel', 'value': 999},
+    {'title': 'Sam', 'value': 121},
+    {'title': 'Tina', 'value': 232},
+  ];
   @override
   Widget build(BuildContext context) {
+    //_controller.text = "Option 2";
     return Scaffold(
       appBar: AppBar(
         title: Text('SelectTextField Example'),
@@ -43,6 +66,7 @@ class _ExamplePageState extends State<ExamplePage> {
                 label: 'Select an option',
                 controller: _controller,
                 onChanged: (value) {
+                  print(value);
                   setState(() {
                     _controller.text = value;
                   });
@@ -58,12 +82,35 @@ class _ExamplePageState extends State<ExamplePage> {
                 label: 'Search Example',
                 controller: _sController,
                 onChanged: (value) {
+                  print("==string===");
+                  print(value);
+
                   setState(() {
                     _sController.text = value;
                   });
                 }),
             Text(
               'Selected Country: ${_sController.text}*',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Using keypair example',
+              style: TextStyle(fontSize: 18),
+            ),
+            SelectTextField(
+                options: keyValuePairs,
+                label: 'Search Example',
+                controller: _sController2,
+                onChanged: (value) {
+                  print("==dynamic===");
+                  print(value);
+                  /*  setState(() {
+                    //_sController.text = value["value"];
+                  }); */
+                }),
+            Text(
+              'Selected Country: ${_sController2.text}*',
               style: TextStyle(fontSize: 18),
             ),
           ],
