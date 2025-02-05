@@ -26,7 +26,6 @@ class _ModalContentState extends State<ModalContent> {
   dynamic _selectedOption;
   String _searchValue = "";
   bool _searchButtonClicked = false;
-  bool _isSimpleList = true;
 
   List<dynamic> _filteredOptions = [];
 
@@ -43,8 +42,6 @@ class _ModalContentState extends State<ModalContent> {
     _filteredOptions = widget.options;
 
     if (widget.options is List<Map<String, dynamic>>) {
-      _isSimpleList = false;
-
       dynamic selectedOption;
       for (var option in widget.options) {
         if ("${option['key']}" == widget.selectedValue.toString()) {

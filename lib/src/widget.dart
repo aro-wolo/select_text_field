@@ -36,7 +36,6 @@ class SelectTextFieldState extends State<SelectTextField> {
   void initState() {
     super.initState();
     newMethod();
-    //widget.controller?.addListener(newMethod);
   }
 
   void newMethod() {
@@ -98,7 +97,6 @@ class SelectTextFieldState extends State<SelectTextField> {
               suffixIcon: IconButton(
                 icon: const Icon(
                   Icons.keyboard_arrow_down,
-                  //color: Colors.grey,
                 ),
                 onPressed: () {
                   _showModalBottomSheet(context);
