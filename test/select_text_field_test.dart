@@ -1,13 +1,23 @@
-// import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:select_text_field/select_text_field.dart';
 
-// import 'package:password_field_validator/password_field_validator.dart';
+void main() {
+  testWidgets('SelectTextField displays text', (WidgetTester tester) async {
+    // Build the widget
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SelectTextField(
+            options: ['Option 1', 'Option 2', 'Option 3'],
+            label: 'Label',
+            controller: TextEditingController(text: 'Test Text'),
+          ),
+        ),
+      ),
+    );
 
-// void main() {
-//   test('adds one to input values', () {
-//     final calculator = Calculator();
-//     expect(calculator.addOne(2), 3);
-//     expect(calculator.addOne(-7), -6);
-//     expect(calculator.addOne(0), 1);
-//     expect(() => calculator.addOne(null), throwsNoSuchMethodError);
-//   });
-// }
+    // Verify the text is displayed
+    expect(find.text('Test Text'), findsOneWidget);
+  });
+}
