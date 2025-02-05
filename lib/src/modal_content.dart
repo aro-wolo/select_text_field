@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:tinycolor2/tinycolor2.dart';
+import 'package:select_text_field/select_text_field.dart';
 
 class ModalContent extends StatefulWidget {
-  final List<String> options;
-  final TextEditingController controller;
+  final List<dynamic> options;
   final String title;
-  final Function(String)? onChanged;
+  final dynamic selectedValue;
+  final Function(dynamic)? onChanged;
+  final Function(dynamic)? onMessage;
 
   const ModalContent({
     super.key,
     required this.options,
-    required this.controller,
     required this.title,
     this.onChanged,
+    this.onMessage,
+    this.selectedValue,
   });
 
   @override
@@ -21,11 +23,11 @@ class ModalContent extends StatefulWidget {
 
 class _ModalContentState extends State<ModalContent> {
   final FocusNode _focusNode = FocusNode();
-  String? _selectedItem;
+  dynamic _selectedOption;
   String _searchValue = "";
-  bool _serachButtonClicked = false;
+  bool _searchButtonClicked = false;
 
-  List<String> _filteredOptions = [];
+  List<dynamic> _filteredOptions = [];
 
   @override
   void dispose() {
@@ -36,10 +38,24 @@ class _ModalContentState extends State<ModalContent> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _selectedItem = widget.controller.text;
-      _filteredOptions = widget.options;
-    });
+
+    _filteredOptions = widget.options;
+
+    if (widget.options is List<Map<String, dynamic>>) {
+      dynamic selectedOption;
+      for (var option in widget.options) {
+        if ("${option['key']}" == widget.selectedValue.toString()) {
+          selectedOption = option;
+          break;
+        }
+      }
+
+      if (selectedOption != null) {
+        _selectedOption = selectedOption;
+      }
+    } else {
+      _selectedOption = widget.selectedValue;
+    }
   }
 
   @override
@@ -68,21 +84,20 @@ class _ModalContentState extends State<ModalContent> {
 
     final double modalHeight = (deviceHeight * heightFactor) + keyboardHeight;
     final bool isFullHeight = modalHeight >= deviceHeight;
-    var _bColor = TinyColor.fromColor(
-            Theme.of(context).bottomSheetTheme.backgroundColor ?? Colors.white)
-        .darken(8)
-        .color;
-    var _bColor2 = TinyColor.fromColor(
-            Theme.of(context).bottomSheetTheme.backgroundColor ?? Colors.white)
-        .darken(3)
-        .color;
 
-    if (_serachButtonClicked) {
+    if (_searchButtonClicked) {
       setState(() {
         FocusScope.of(context).requestFocus(_focusNode);
       });
     }
     return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+        color: Theme.of(context).colorScheme.surface,
+      ),
       padding: EdgeInsets.only(
         top: isFullHeight ? topObstructions : 0,
         bottom: keyboardHeight + bottomObstructions,
@@ -94,24 +109,27 @@ class _ModalContentState extends State<ModalContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(15, 20, 15, 20),
+            padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(25),
                 topRight: Radius.circular(25),
               ),
-              color: _bColor,
+              color: Theme.of(context).colorScheme.surface,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: _serachButtonClicked
+                  child: _searchButtonClicked
                       ? Row(
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
-                              child: Icon(Icons.search, color: Colors.grey),
+                              child: Icon(Icons.search,
+                                  color: Theme.of(context)
+                                      .scaffoldBackgroundColor
+                                      .darken(10)),
                             ),
                             Expanded(
                               child: TextField(
@@ -120,20 +138,44 @@ class _ModalContentState extends State<ModalContent> {
                                   isDense: true,
                                   contentPadding: EdgeInsets.zero,
                                   hintText: 'Search for ${widget.title}..',
-                                  focusedBorder: UnderlineInputBorder(
-                                      borderSide: BorderSide(width: 0, color: _bColor)),
-                                  enabledBorder: UnderlineInputBorder(
-                                    borderSide: BorderSide(width: 0, color: _bColor),
+                                  focusedBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(width: 0, color: Colors.grey),
+                                  ),
+                                  hintStyle:
+                                      TextStyle(color: Colors.grey.withOpacity(.75)),
+                                  enabledBorder: const UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 0,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
                                 onChanged: (value) {
                                   setState(() {
                                     _searchValue = value;
-                                    _filteredOptions = widget.options
-                                        .where((item) => item
+                                    if (widget.options is List<Map<String, dynamic>>) {
+                                      _filteredOptions =
+                                          (widget.options as List<Map<String, dynamic>>)
+                                              .where((item) {
+                                        return item['title']
                                             .toLowerCase()
-                                            .contains(value.toLowerCase()))
-                                        .toList();
+                                            .contains(value.toLowerCase());
+                                      }).toList();
+                                      _filteredOptions.map((item) {
+                                        return {
+                                          'title': item['title'],
+                                          'key': item['key'],
+                                        };
+                                      }).toList();
+                                    } else {
+                                      _filteredOptions = widget.options
+                                          .where(
+                                            (item) => item.toLowerCase().contains(
+                                                  value.toLowerCase(),
+                                                ),
+                                          )
+                                          .toList();
+                                    }
                                   });
                                 },
                               ),
@@ -142,7 +184,7 @@ class _ModalContentState extends State<ModalContent> {
                         )
                       : Text(
                           widget.title,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.w500,
                           ),
@@ -151,20 +193,18 @@ class _ModalContentState extends State<ModalContent> {
                 Row(
                   children: [
                     Visibility(
-                      visible: widget.options.length > 15 && !_serachButtonClicked,
-                      child: modalIconButton(
-                        bgColor: _bColor2,
+                      visible: widget.options.length > 15 && !_searchButtonClicked,
+                      child: ModalIconButton(
                         onTap: () {
                           setState(() {
-                            _serachButtonClicked = true;
+                            _searchButtonClicked = true;
                           });
                         },
                         iconName: Icons.search,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    modalIconButton(
-                      bgColor: _bColor2,
+                    ModalIconButton(
                       onTap: () => Navigator.of(context).pop(),
                       iconName: Icons.close,
                     ),
@@ -174,27 +214,54 @@ class _ModalContentState extends State<ModalContent> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _filteredOptions.length,
-              itemBuilder: (context, index) {
-                final highlightedOption =
-                    _getHighlightedText(_filteredOptions[index], _searchValue);
-                return RadioListTile(
-                  title: Text.rich(highlightedOption),
-                  value: _filteredOptions[index],
-                  groupValue: _selectedItem,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedItem = value;
-                    });
-                    widget.controller.text = value!;
-                    widget.onChanged?.call(value);
-                    Future.delayed(Duration(milliseconds: 250), () {
-                      Navigator.pop(context);
-                    });
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(0, 20, 8, 15),
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(15),
+                  ),
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+                child: ListView.builder(
+                  itemCount: _filteredOptions.length,
+                  itemBuilder: (context, index) {
+                    final result = _filteredOptions[index];
+                    final highlightedOption = _getHighlightedText(
+                      _filteredOptions[index],
+                      _searchValue,
+                    );
+                    //print("widget.selectedValue=${widget.selectedValue}");
+                    return RadioListTile(
+                      title: Text.rich(highlightedOption),
+                      //value: _isSimpleList ? result : result['key'],
+                      value: result,
+                      //groupValue: _selectedValue,
+                      groupValue: _selectedOption,
+                      // groupValue: widget.selectedValue,
+                      //groupValue: widget.selectedValue,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedOption = value;
+                        });
+                        widget.onMessage!(value);
+
+                        /* if (_isSimpleList) {
+                          widget.onChanged?.call(value);
+                        } else {
+                          widget.onChanged?.call(value);
+                        } */
+                        widget.onChanged?.call(value);
+
+                        Future.delayed(const Duration(milliseconds: 200), () {
+                          Navigator.pop(context);
+                        });
+                      },
+                    );
                   },
-                );
-              },
+                ),
+              ),
             ),
           ),
         ],
@@ -202,61 +269,39 @@ class _ModalContentState extends State<ModalContent> {
     );
   }
 
-  TextSpan _getHighlightedText(String text, String query) {
-    if (query.isEmpty) return TextSpan(text: text);
+  TextSpan _getHighlightedText(dynamic text, String query) {
+    String nText;
+    if (text is String) {
+      nText = text;
+    } else {
+      nText = text['title'];
+    }
+    if (query.isEmpty) {
+      return TextSpan(text: nText);
+    }
 
-    final matches = RegExp(query, caseSensitive: false).allMatches(text);
-    if (matches.isEmpty) return TextSpan(text: text);
+    final matches = RegExp(query, caseSensitive: false).allMatches(nText);
+    if (matches.isEmpty) {
+      return TextSpan(text: nText);
+    }
 
     List<TextSpan> spans = [];
     int start = 0;
     for (Match match in matches) {
-      final beforeMatch = text.substring(start, match.start);
-      final matchText = text.substring(match.start, match.end);
+      final beforeMatch = nText.substring(start, match.start);
+      final matchText = nText.substring(match.start, match.end);
       spans.add(TextSpan(text: beforeMatch));
       spans.add(TextSpan(
         text: matchText,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          color: Colors.purpleAccent,
+          //color: Colors.purpleAccent,
         ),
       ));
       start = match.end;
     }
-    spans.add(TextSpan(text: text.substring(start)));
+    spans.add(TextSpan(text: nText.substring(start)));
 
     return TextSpan(children: spans);
-  }
-}
-
-class modalIconButton extends StatelessWidget {
-  final Function() onTap;
-  final IconData iconName;
-  final Color bgColor;
-
-  const modalIconButton({
-    super.key,
-    required this.onTap,
-    required this.iconName,
-    required this.bgColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-          color: bgColor,
-        ),
-        child: Icon(
-          iconName,
-          size: 20.0,
-          color: Colors.black87,
-        ),
-      ),
-    );
   }
 }
