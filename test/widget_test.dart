@@ -7,9 +7,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:select_text_field/select_text_field.dart';
-
 import '../example/lib/main.dart';
 
 void main() {
